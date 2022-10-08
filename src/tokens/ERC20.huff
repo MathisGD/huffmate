@@ -194,10 +194,10 @@
         0x00 0x00 revert                    // []
 }
 
-/// @notice Transfers an amount of tokens from
+/// @notice Takes an amount of tokens from an address.
 #define macro _TRANSFER_TAKE_FROM() = takes (3) returns (3) {
     // input stack: [value, from, to]
-    dup2 [BALANCE_SLOT] LOAD_ELEMENT_FROM_KEYS(0x00)        // [balance, value, from, to]                                                // [from, value, from, to]
+    dup2 [BALANCE_SLOT] LOAD_ELEMENT_FROM_KEYS(0x00)        // [balance, value, from, to]
     dup1                                                    // [balance, balance, value, from, to]
     dup3                                                    // [value, balance, balance, value, from, to]
     gt                                                      // [value > balance, balance, value, from, to]
@@ -216,7 +216,7 @@
         [BALANCE_SLOT] STORE_ELEMENT_FROM_KEYS(0x00)        // [value, from, to]
 }
 
-/// @notice Transfers an amount of tokens from one address to another.
+/// @notice Gives an amount of tokens to an address.
 #define macro _TRANSFER_GIVE_TO() = takes (3) returns (3) {
     // input stack: [value, from, to]
     dup3                                                // [to, value, from, to]
@@ -508,12 +508,14 @@
 
 // MINT/BURN LOGIC
 
+/// @notice Burns tokens from a specified address.
 #define macro _BURN() = takes(2) returns (0) {
-    // stack input: [value, from]
+    // Input stack: [value, from]
     [ZERO_ADDRESS]                  // [zero, value, from]
     swap2 swap1                     // [value, from, zero]
-
     _TRANSFER_TAKE_FROM()           // [value, from, zero]
+
+    // Update totalSupply.
     dup1                            // [value, value, from, zero]
     [TOTAL_SUPPLY_SLOT] sload       // [supply, value, value, from, zero]
     sub                             // [supply-value, value, from, zero]
@@ -526,7 +528,7 @@
     log3                            // []
 }
 
-/// @notice Mints tokens to a specified address
+/// @notice Mints tokens to a specified address.
 #define macro _MINT() = takes (2) returns (0) {
     // Input stack: [value, to]
     dup2                            // [to, value, to]
