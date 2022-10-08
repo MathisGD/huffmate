@@ -531,22 +531,21 @@
 /// @notice Mints tokens to a specified address.
 #define macro _MINT() = takes (2) returns (0) {
     // Input stack: [value, to]
-    dup2                            // [to, value, to]
-    swap1                           // [value, to, to]
-    _TRANSFER_GIVE_TO()             // [value, to, to]
+    [ZERO_ADDRESS]                  // [zero, value, to]
+    swap1                           // [value, zero, to]
+    _TRANSFER_GIVE_TO()             // [value, zero, to]
 
-    // Update totalSupply
-    dup1                            // [value, value, to, to]
-    [TOTAL_SUPPLY_SLOT] sload       // [supply, value, value, to, to]
-    add                             // [supply + value, value, to, to]
-    [TOTAL_SUPPLY_SLOT] sstore      // [value, to, to]
+    // Update totalSupply.
+    dup1                            // [value, value, zero, to]
+    [TOTAL_SUPPLY_SLOT] sload       // [supply, value, value, zero, to]
+    add                             // [supply + value, value, zero, to]
+    [TOTAL_SUPPLY_SLOT] sstore      // [value, zero, to]
 
     // Emit the transfer event.
-    0x00 mstore                     // [to, to]
-    [ZERO_ADDRESS]                  // [address(0), to, to]
-    __EVENT_HASH(Transfer)          // [sig, from, to, to]
-    0x20 0x00                       // [0, 32, sig, from, to, to]
-    log3 pop                        // []
+    0x00 mstore                     // [zero, to]
+    __EVENT_HASH(Transfer)          // [sig, zero, to]
+    0x20 0x00                       // [0, 32, sig, zero, to]
+    log3                            // []
 }
 
 
